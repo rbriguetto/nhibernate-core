@@ -1,5 +1,6 @@
 using System;
-
+using System.Collections;
+using System.Collections.Generic;
 using NHibernate.Engine;
 using NHibernate.Properties;
 
@@ -85,35 +86,85 @@ namespace NHibernate.Tuple.Component
 			try
 			{
 
-				object[] receivedValues;
+				var hashtable = component as Hashtable;
 
-				if (component.GetType() == typeof(object[]))
+				if ((component as Hashtable) != null || (component as Dictionary<string, object>) != null)
 				{
-					receivedValues = (object[]) component;
-				} else
-				{
-					var t = component.GetType();
-					return new object[propertySpan];
+					object[] values = new object[propertySpan];
+
+					// NH Different behavior : for NH-1101
+					if (component != null)
+						for (int i = 0; i < propertySpan; i++)
+						{
+							values[i] = GetPropertyValue(component, i);
+						}
+
+					return values;
+
 				}
 
-				object[] values = new object[propertySpan];
+				//var dictionary = component as Dictionary<string, object>;
+				//if (dictionary != null)
+				//{
+				//	object[] values = new object[propertySpan];
 
-				// NH Different behavior : for NH-1101
-				if (component != null)
-				for (int i = 0; i < propertySpan; i++)
+				//	// NH Different behavior : for NH-1101
+				//	if (component != null)
+				//		for (int i = 0; i < propertySpan; i++)
+				//		{
+				//			values[i] = GetPropertyValue(component, i);
+				//		}
+
+				//	return values;
+				//}
+
+				var objectlist = component as object[];
+				if (objectlist != null)
 				{
-					//try
-					//{
-					//	values[i] = GetPropertyValue(component, i);
-					//}
-					//catch (Exception)
-					//{
-						values[i] = receivedValues[i];
-					// }
-					
+					var values = new object[propertySpan];
+					for(int i = 0; i < propertySpan; i++)
+					{
+						values[i] = objectlist[i];
+					}
 				}
+
+				return new object[propertySpan];
+
+
+				//object[] receivedValues;
+
+				//if (component.GetType() == typeof(object[]))
+				//{
+				//	receivedValues = (object[]) component;
+				//}
+				//else
+				//{
+				//	if (component.GetType() == typeof(Hashtable))
+				//	{
+
+				//	}
+				//	var t = component.GetType();
+				//	return new object[propertySpan];
+				//}
+
+				//object[] values = new object[propertySpan];
+
+				//// NH Different behavior : for NH-1101
+				//if (component != null)
+				//for (int i = 0; i < propertySpan; i++)
+				//{
+				//	//try
+				//	//{
+				//	//	values[i] = GetPropertyValue(component, i);
+				//	//}
+				//	//catch (Exception)
+				//	//{
+				//		values[i] = receivedValues[i];
+				//	// }
 					
-				return values;
+				//}
+					
+				//return values;
 
 			} catch
 			{
