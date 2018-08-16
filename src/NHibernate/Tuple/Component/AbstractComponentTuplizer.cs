@@ -82,13 +82,43 @@ namespace NHibernate.Tuple.Component
 
 		public virtual object[] GetPropertyValues(object component)
 		{
-			object[] values = new object[propertySpan];
-			// NH Different behavior : for NH-1101
-			if (component != null)
-				for (int i = 0; i < propertySpan; i++)
-					values[i] = GetPropertyValue(component, i);
+			try
+			{
 
-			return values;
+				object[] receivedValues;
+
+				if (component.GetType() == typeof(object[]))
+				{
+					receivedValues = (object[]) component;
+				} else
+				{
+					var t = component.GetType();
+					return new object[propertySpan];
+				}
+
+				object[] values = new object[propertySpan];
+
+				// NH Different behavior : for NH-1101
+				if (component != null)
+				for (int i = 0; i < propertySpan; i++)
+				{
+					//try
+					//{
+					//	values[i] = GetPropertyValue(component, i);
+					//}
+					//catch (Exception)
+					//{
+						values[i] = receivedValues[i];
+					// }
+					
+				}
+					
+				return values;
+
+			} catch
+			{
+				return new object[propertySpan];
+			}
 		}
 
 		public virtual void SetPropertyValues(object component, object[] values)

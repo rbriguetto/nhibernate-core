@@ -227,6 +227,12 @@ namespace NHibernate.Cfg
 				{
 					throw new MappingException("property not known: " + pc.MappedClass.FullName + '.' + propertyName);
 				}
+
+				if (prop.Type.GetType() == typeof(ComponentType))
+				{
+					prop = pc.GetReferencedProperty(propertyName);
+				}
+
 				return prop.Type;
 			}
 
